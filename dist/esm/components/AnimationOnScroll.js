@@ -22,7 +22,8 @@ export const AnimationOnScroll = ({
   afterAnimatedOut,
   scrollableParentSelector,
   animateOnce = false,
-  children
+  children,
+  anchorId
 }) => {
   const [classes, setClasses] = useState(animatedClass);
   const [style, setStyle] = useState({
@@ -90,8 +91,11 @@ export const AnimationOnScroll = ({
     return !isAboveScreen(elementBottom) && !isBelowScreen(elementTop);
   }, [isAboveScreen, isBelowScreen]);
   const getVisibility = useCallback(() => {
-    const elementTop = getElementTop(node.current) - getElementTop(scrollableParentRef.current);
-    const elementBottom = elementTop + node.current.clientHeight;
+    let elem = node.current;
+    if (anchorId && document.getElementById(anchorId))
+      elem = document.getElementById(anchorId)
+    const elementTop = getElementTop(elem) - getElementTop(scrollableParentRef.current);
+    const elementBottom = elementTop + elem.clientHeight;
     return {
       inViewport: inViewport(elementTop, elementBottom),
       onScreen: onScreen(elementTop, elementBottom)
