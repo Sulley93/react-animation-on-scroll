@@ -30,6 +30,7 @@ export const AnimationOnScroll = ({
     animationDuration: `${duration}s`,
     opacity: initiallyVisible ? 1 : 0
   });
+  let pageLoad = true;
   const node = useRef(null);
   const animating = useRef(false);
   const visibilityRef = useRef({
@@ -105,9 +106,14 @@ export const AnimationOnScroll = ({
     return previousVis.inViewport !== currentVis.inViewport || previousVis.onScreen !== currentVis.onScreen;
   }, []);
   const animate = useCallback((animation, callback) => {
+    console.log("Delay: ", delay)
+    console.log("Outside timeout")
     delayedAnimationTORef.current = setTimeout(() => {
+      console.log("Inside timeout")
       animating.current = true;
       setClasses(`${animatedClass} ${animation}`);
+      console.log(animatedClass)
+      console.log(animation)
       setStyle({
         animationDuration: `${duration}s`
       });
@@ -115,7 +121,9 @@ export const AnimationOnScroll = ({
     }, delay);
   }, [animating, delay, duration]);
   const animateInTrigger = useCallback(callback => {
+    console.log("animateInTrigger outside")
     animate(animateIn, () => {
+      console.log("AnimateInTrigger callback")
       if (!animateOnce) {
         setStyle({
           animationDuration: `${duration}s`,
@@ -157,7 +165,6 @@ export const AnimationOnScroll = ({
         current: visibility
       } = visibilityRef;
       const currentVis = getVisibility();
-
       if (visibilityHasChanged(visibility, currentVis)) {
         clearTimeout(delayedAnimationTORef.current);
 
@@ -196,8 +203,11 @@ export const AnimationOnScroll = ({
       }
 
       return () => {
-        clearTimeout(delayedAnimationTORef.current);
-        clearTimeout(callbackTORef.current);
+        if (!pageLoad) {
+          clearTimeout(delayedAnimationTORef.current);
+          clearTimeout(callbackTORef.current);
+        }
+        pageLoad = false;
 
         if (window && window.removeEventListener) {
           window.removeEventListener('scroll', listener);
